@@ -39,24 +39,18 @@ purchaseDetails.items.forEach(function (item) {
         }
     }
     if(item.count > 0) {
-        let noOfSetsCanOrderFromOrderedCountry = Math.floor(orderedCountryItem.remainingCount / 10);
-        let noOfItemsCanOrder = 0;
-        if((item.count % 10) > 0) {
-            noOfSetsCanOrderFromOrderedCountry -= 1;
-            noOfItemsCanOrder += item.count % 10;
-        }
-        noOfItemsCanOrder += noOfSetsCanOrderFromOrderedCountry*10;
-        if(noOfItemsCanOrder >= item.count) {
+        if(orderedCountryItem.remainingCount >= item.count) {
             salePrice += item.count*orderedCountryItem.salePrice;
             orderedCountryItem.remainingCount -= item.count;
             item.count = 0;
         } else {
-            salePrice += noOfItemsCanOrder*orderedCountryItem.salePrice;
-            orderedCountryItem.remainingCount -= noOfItemsCanOrder;
-            item.count -= noOfItemsCanOrder;
+            salePrice += orderedCountryItem.remainingCount*orderedCountryItem.salePrice;
+            item.count -= orderedCountryItem.remainingCount;
+            orderedCountryItem.remainingCount = 0;
             extraCountFromOtherCountry += item.count;
-            if(item.count % 10 === 0 && Math.floor(otherCountryItem.remainingCount/10) >= Math.floor(item.count/10)) {
-                salePrice += Math.floor(item.count/10)*otherCountryPriceForTenUnits ;
+            if(otherCountryItem.remainingCount >= item.count) {
+                let transportCharge1 = Math.ceil(item.count/10)*transportCharge;
+                salePrice += (item.count*otherCountryItem.salePrice + transportCharge1);
                 otherCountryItem.remainingCount -= item.count;
                 item.count = 0;
             } else {
@@ -91,9 +85,3 @@ function GetUserCountry(passportNumber) {
     }
 }
 
-function calculatePriceForTenUnits(countryName, isOtherCountry, stock) {
-    let transportCharge = 0;
-    if(purchaseDetails.userCountry !== purchaseDetails.countryName) {
-        transportCharge = (transportCharge - transportCharge*(Data.DISCOUNT_FOR_SAME_COUNTRY/100));
-    }
-}
